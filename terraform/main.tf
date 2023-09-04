@@ -10,7 +10,7 @@ resource "aws_subnet" "my_subnet" {
 resource "aws_security_group" "docker_sg" {
   vpc_id = aws_vpc.my_vpc.id
 
-  # SSH (Port 22)
+  
   ingress {
     from_port   = 22
     to_port     = 22
@@ -18,14 +18,7 @@ resource "aws_security_group" "docker_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # HTTP (Port 80)
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  # HTTP (Port 80)
+  
   ingress {
     from_port   = 80
     to_port     = 80
@@ -33,7 +26,7 @@ resource "aws_security_group" "docker_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Port 8888
+  
   ingress {
     from_port   = 8888
     to_port     = 8888
@@ -41,7 +34,6 @@ resource "aws_security_group" "docker_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Port 9090
   ingress {
     from_port   = 9090
     to_port     = 9090
@@ -49,14 +41,13 @@ resource "aws_security_group" "docker_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Port 9100
   ingress {
     from_port   = 9100
     to_port     = 9100
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-# Port 3000
+
   ingress {
     from_port   = 3000
     to_port     = 3000
@@ -73,12 +64,13 @@ resource "aws_security_group" "docker_sg" {
 }
 
 resource "aws_instance" "docker_instance" {
-  image_id        = data.aws_ami.server_ami.id
+  ami           = data.aws_ami.server_ami.id
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.my_subnet.id
 
-  security_groups = [aws_security_group.docker_sg.name]
-    user_data = <<-EOF
+  security_groups = [aws_security_group.docker_sg.id]
+  key_name = "red"
+  user_data = <<-EOF
     #!/bin/bash
     sudo apt update
     sudo apt install -y docker.io
@@ -89,4 +81,14 @@ resource "aws_instance" "docker_instance" {
   tags = {
     Name = "docker-instance"
   }
+}
+
+resource "docker_container" "container1" {
+  name  = "container1"
+  image = "ubuntu:latest"  
+}
+
+resource "docker_container" "container2" {
+  name  = "container2"
+  image = "debian:latest" 
 }
